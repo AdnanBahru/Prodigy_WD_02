@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timer Web App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: aqua;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            margin: 0;
+            color: #333;
+        }
+        .timer {
+            font-size: 48px;
+            margin: 20px 0;
+            color: #222;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background-color: #007BFF;
+            color: white;
+            transform: scale(1.1);
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        button#start {
+            background-color: #28a745;
+            color: white;
+        }
+        button#lap {
+            background-color: #ffc107;
+            color: white;
+        }
+        button#reset {
+            background-color: #dc3545;
+            color: white;
+        }
+        .laps {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .lap-item {
+            margin: 5px 0;
+            padding: 5px;
+            background: #f1f1f1;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Timer</h1>
+        <div class="timer" id="timer">00:00:00</div>
+        <div class="buttons">
+            <button id="start">Start</button>
+            <button id="lap">Lap</button>
+            <button id="reset">Reset</button>
+        </div>
+        <div class="laps" id="laps"></div>
+    </div>
+
+    <script>
+        // Timer Variables
+        let startTime = null;
+        let elapsedTime = 0;
+        let timerInterval = null;
+        let running = false;
+
+        // DOM Elements
+        const timerDisplay = document.getElementById('timer');
+        const startButton = document.getElementById('start');
+        const lapButton = document.getElementById('lap');
+        const resetButton = document.getElementById('reset');
+        const lapsContainer = document.getElementById('laps');
+
+        // Format time to HH:MM:SS
+        function formatTime(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+            const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+            const seconds = String(totalSeconds % 60).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+
+        // Start or Pause Timer
+        startButton.addEventListener('click', () => {
+            if (running) {
+                clearInterval(timerInterval);
+                startButton.textContent = 'Start';
+            } else {
+                startTime = Date.now() - elapsedTime;
+                timerInterval = setInterval(() => {
+                    elapsedTime = Date.now() - startTime;
+                    timerDisplay.textContent = formatTime(elapsedTime);
+                }, 1000);
+                startButton.textContent = 'Pause';
+            }
+            running = !running;
+        });
+
+        // Record Lap
+        lapButton.addEventListener('click', () => {
+            if (running) {
+                const lapTime = formatTime(elapsedTime);
+                const lapItem = document.createElement('div');
+                lapItem.classList.add('lap-item');
+                lapItem.textContent = `Lap ${lapsContainer.children.length + 1}: ${lapTime}`;
+                lapsContainer.appendChild(lapItem);
+            }
+        });
+
+        // Reset Timer
+        resetButton.addEventListener('click', () => {
+            clearInterval(timerInterval);
+            elapsedTime = 0;
+            running = false;
+            timerDisplay.textContent = '00:00:00';
+            startButton.textContent = 'Start';
+            lapsContainer.innerHTML = '';
+        });
+    </script>
+</body>
+</html>
